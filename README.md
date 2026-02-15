@@ -37,4 +37,4 @@ Karena ini menggunakan Firebase, kamu memerlukan file konfigurasi kredensial aga
 
 1. **Clone repository ini**
    ```bash
-   git clone [https://github.com/username_kamu/smartkoi.git](https://github.com/username_kamu/smartkoi.git)
+   git clone [https://github.com/MhdFarhan17/Aplikasi-SmartKOI.git](https://github.com/MhdFarhan17/Aplikasi-SmartKOI.git)
