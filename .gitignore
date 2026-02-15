@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase
+/android/app/google-services.json
+/functions/serviceAccountKey.json
+
+# Keamanan Tambahan untuk Android
+/android/local.properties
+/android/key.properties
+**/*.keystore
+**/*.jks
+
+# Firebase untuk iOS (Karena ini Flutter, bersiap kalau nanti di-build ke iOS)
+/ios/Runner/GoogleService-Info.plist
+
+# Environment Variables (Kalau kamu pakai file .env untuk simpan API Key lain)
+.env
