@@ -7,13 +7,11 @@ import 'package:smartkoi/app/data/models/battery_data_model.dart';
 import 'package:smartkoi/app/data/models/control_settings_model.dart';
 import 'package:smartkoi/app/data/models/sensor_data_model.dart';
 import 'package:smartkoi/app/shared/utils/notification_service.dart';
-import 'package:smartkoi/app/shared/utils/latency_monitor.dart';
 import 'package:smartkoi/app/data/repositories/dashboard_repository.dart';
 
 class DashboardController extends GetxController {
   final DashboardRepository _repository = DashboardRepository();
   final _storage = GetStorage();
-  final LatencyMonitor _latencyMonitor = LatencyMonitor();
 
   final RxString activeDeviceId = ''.obs;
   final RxBool isLoading = false.obs;
@@ -35,8 +33,6 @@ class DashboardController extends GetxController {
   }
 
   void onClose() {
-    // 2. Matikan monitor saat controller hancur (opsional, tapi bagus)
-    _latencyMonitor.stopMonitoring();
     super.onClose();
   }
 
@@ -48,7 +44,6 @@ class DashboardController extends GetxController {
     controlSettings.value = null;
     notificationSettings.value = null;
     _storage.remove('last_device_id');
-    _latencyMonitor.stopMonitoring();
   }
 
   /// Fungsi utama untuk menghubungkan aplikasi ke alat (IoT)
@@ -82,8 +77,6 @@ class DashboardController extends GetxController {
       batteryData.bindStream(_repository.getBatteryDataStream(deviceId));
       controlSettings.bindStream(_repository.getControlSettingsStream(deviceId));
       notificationSettings.bindStream(_repository.getNotificationSettingsStream(deviceId));
-
-      _latencyMonitor.startMonitoring(deviceId);
 
       // Tampilkan notifikasi hanya jika bukan auto-load (saat user input manual)
       if (!isAutoLoad) {

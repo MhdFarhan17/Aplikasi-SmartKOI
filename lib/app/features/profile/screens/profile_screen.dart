@@ -255,78 +255,155 @@ class ProfileScreen extends StatelessWidget {
 
   // --- DIALOGS ---
 
-  // 1. Dialog About App
+// 1. Dialog About App
   void _showAboutAppDialog(BuildContext context) {
     if (Get.isDialogOpen ?? false) return;
 
     Get.dialog(
       Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        elevation: 10,
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // --- 1. LOGO APLIKASI ---
               Container(
-                height: 80,
-                width: 80,
+                height: 90,
+                width: 90,
+                padding: const EdgeInsets.all(4), // Memberi jarak antara border dan gambar
                 decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    border: Border.all(color: Colors.grey.shade200),
-                    boxShadow: [
-                      BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10)
-                    ]
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(color: Colors.blue.shade100, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.15),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
                 ),
                 child: ClipOval(
                   child: Image.asset(
                     'assets/images/icon-app.png',
                     fit: BoxFit.cover,
-                    // Fallback jika gambar tidak ditemukan
                     errorBuilder: (ctx, error, stackTrace) =>
                         Icon(Iconsax.autobrightness, size: 40, color: Colors.blue[700]),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
+
+              // --- 2. NAMA & VERSI APLIKASI ---
               const Text(
                 'SmartKOI',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                    color: Colors.black87),
               ),
-              const Text(
-                'v1.0.0',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+              const SizedBox(height: 8),
+              // Badge Versi
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Text(
+                  'Versi 1.0.0',
+                  style: TextStyle(
+                      color: Colors.blue[800],
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
+                ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              // --- 3. DESKRIPSI ---
               const Text(
-                'Sistem Pemantauan Cerdas Berbasis IoT untuk Kualitas Air Kolam Koi.',
+                'Sistem monitoring secara real-time untuk kualitas air, informasi status aktuator, dan informasi detail baterai sebagai daya cadangan untuk Akuarium Ikan Koi.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, height: 1.5, color: Colors.black87),
+                style: TextStyle(
+                    fontSize: 13,
+                    height: 1.6,
+                    color: Colors.black54),
               ),
               const SizedBox(height: 24),
-              const Divider(),
-              const SizedBox(height: 16),
-              const Text(
-                'Dikembangkan oleh:',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+
+              // --- 4. KARTU DEVELOPER (DEVELOPER INFO) ---
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'DIKEMBANGKAN OLEH',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                          color: Colors.grey[500]),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Muhammad Farhan',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          color: Colors.blue[900]),
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Teknik Elektro UNDIP',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Colors.black87),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Konsentrasi Teknologi Informasi',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[600]),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 4),
-              const Text(
-                'Muhammad Farhan',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
+
+              // --- 5. TOMBOL TUTUP ---
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Get.back(),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[800],
+                    backgroundColor: Colors.blue[700],
+                    elevation: 0,
+                    shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                        borderRadius: BorderRadius.circular(14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-                  child: const Text('Tutup', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Tutup',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16),
+                  ),
                 ),
               ),
             ],
