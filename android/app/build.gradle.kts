@@ -18,7 +18,7 @@ fun localProperties(key: String, file: String = "local.properties"): String {
 }
 
 android {
-    namespace = "com.example.smartkoi"
+    namespace = "com.mfarhan.smartkoi"
     compileSdk = flutter.compileSdkVersion.toInt()
     // ndkVersion = "27.0.12077973"
 
@@ -33,7 +33,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.smartkoi"
+        applicationId = "com.mfarhan.smartkoi"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion.toInt()
         versionCode = localProperties("flutter.versionCode").toIntOrNull() ?: 1

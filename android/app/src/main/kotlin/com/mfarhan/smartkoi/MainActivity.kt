@@ -1,4 +1,4 @@
-package com.example.smartkoi
+package com.mfarhan.smartkoi
 
 import io.flutter.embedding.android.FlutterActivity
 

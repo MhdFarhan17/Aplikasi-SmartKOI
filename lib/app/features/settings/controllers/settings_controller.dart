@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smartkoi/app/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:smartkoi/app/data/models/control_settings_model.dart';
-// Note: Kita tidak butuh AlertHelper di sini karena DashboardController yang akan memunculkan alertnya.
+import 'package:firebase_database/firebase_database.dart';
+import 'package:smartkoi/app/shared/widgets/alert_helper.dart';
 
 class SettingsController extends GetxController {
   final DashboardController _dashboardController = Get.find<DashboardController>();
@@ -18,8 +19,14 @@ class SettingsController extends GetxController {
   late TextEditingController turbidityMinC;
   late TextEditingController turbidityMaxC;
 
-  // --- GETTERS ---
-  // Menghubungkan data dari DashboardController ke UI Settings
+  // --- TEXT CONTROLLERS (Wi-Fi) ---
+  late TextEditingController ssidC;
+  late TextEditingController passwordC;
+
+  // --- REACTIVE VARIABLES (Wi-Fi) ---
+  // Untuk menampilkan data realtime di UI tanpa harus reload
+  final RxString currentSsid = 'Memuat...'.obs;
+  final RxString currentPassword = ''.obs;
 
   /// Mengambil nilai setting saat ini (Realtime)
   ControlSettingsModel? get controlSettings =>
@@ -44,15 +51,17 @@ class SettingsController extends GetxController {
     tdsMaxC = TextEditingController();
     turbidityMinC = TextEditingController();
     turbidityMaxC = TextEditingController();
+    ssidC = TextEditingController();
+    passwordC = TextEditingController();
 
     // 2. Setup Listener (Reactive)
-    // "ever" akan memantau perubahan data di DashboardController.
-    // Jika data dari server berubah (misal device lain mengupdate setting),
-    // form di halaman ini akan otomatis terisi nilai baru.
     ever(_dashboardController.controlSettings, _populateFields);
 
     // 3. Isi form saat pertama kali dibuka
     _populateFields(_dashboardController.controlSettings.value);
+
+    // 4. Setup Listener Wi-Fi
+    _listenToWifiSettings();
   }
 
   @override
@@ -66,6 +75,8 @@ class SettingsController extends GetxController {
     tdsMaxC.dispose();
     turbidityMinC.dispose();
     turbidityMaxC.dispose();
+    ssidC.dispose();
+    passwordC.dispose();
     super.onClose();
   }
 
@@ -87,9 +98,49 @@ class SettingsController extends GetxController {
     }
   }
 
-  // --- FUNGSI UPDATE (DELEGASI) ---
-  // Controller ini hanya perantara, logika simpan ada di DashboardController
-  // DashboardController juga yang akan menampilkan CustomAlert Sukses/Gagal.
+  /// Fungsi baru: Mendengarkan data Wi-Fi secara Realtime
+  void _listenToWifiSettings() {
+    if (!isDeviceActive) return;
+    final deviceId = _dashboardController.activeDeviceId.value;
+    final wifiRef = FirebaseDatabase.instance.ref('Devices/$deviceId/setting_wifi');
+
+    wifiRef.onValue.listen((event) {
+      if (event.snapshot.value != null) {
+        final data = Map<String, dynamic>.from(event.snapshot.value as Map);
+        currentSsid.value = data['ssid']?.toString() ?? 'Tidak ada SSID';
+        currentPassword.value = data['password']?.toString() ?? '';
+
+        // Isi text field agar saat dialog dibuka sudah ada teksnya
+        ssidC.text = currentSsid.value;
+        passwordC.text = currentPassword.value;
+      } else {
+        currentSsid.value = 'Belum Diatur';
+      }
+    });
+  }
+
+  // Update Wi-Fi Langsung ke Firebase
+  Future<void> saveWifiSettings() async {
+    if (!isDeviceActive) return;
+
+    if (ssidC.text.trim().isEmpty) {
+      CustomAlert.show(AlertType.warning, 'Peringatan', 'SSID tidak boleh kosong!');
+      return;
+    }
+
+    final deviceId = _dashboardController.activeDeviceId.value;
+    try {
+      Get.back(); // Tutup dialog
+      await FirebaseDatabase.instance.ref('Devices/$deviceId/setting_wifi').set({
+        'ssid': ssidC.text.trim(),
+        'password': passwordC.text, // Password bisa kosong jika open wifi
+      });
+      CustomAlert.show(AlertType.success, 'Berhasil', 'Pengaturan Wi-Fi berhasil diperbarui.');
+    } catch (e) {
+      CustomAlert.show(AlertType.error, 'Gagal', 'Terjadi kesalahan: $e');
+    }
+  }
+
 
   void updateNotificationSetting(String key, bool value) {
     if (!isDeviceActive) return;

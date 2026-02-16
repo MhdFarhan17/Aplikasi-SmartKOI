@@ -45,7 +45,7 @@ class SettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
           children: [
             // --- BAGIAN 1: BATAS PARAMETER ---
-            _buildSectionTitle('Batas Sensor & Target'),
+            _buildSectionTitle('Nilai Parameter Sensor'),
             const SizedBox(height: 12),
 
             Container(
@@ -106,7 +106,32 @@ class SettingsScreen extends StatelessWidget {
 
             const SizedBox(height: 30),
 
-            // --- BAGIAN 2: NOTIFIKASI ---
+            // --- BAGIAN 2: PENGATURAN WI-FI ALAT ---
+            _buildSectionTitle('Wi-Fi Perangkat'),
+            const SizedBox(height: 12),
+
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)
+                  ]
+              ),
+              child: SettingsTile(
+                icon: Iconsax.wifi,
+                iconColor: Colors.cyan,
+                title: 'Wi-Fi Perangkat',
+                subtitle: 'Ubah SSID dan Password Perangkat',
+                // Value diambil dari RxString secara realtime
+                value: controller.currentSsid.value,
+                onTap: () => _showUpdateWifiDialog(context, controller),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // --- BAGIAN 3: NOTIFIKASI ---
             _buildSectionTitle('Notifikasi'),
             const SizedBox(height: 12),
 
@@ -147,6 +172,71 @@ class SettingsScreen extends StatelessWidget {
   }
 
   // --- DIALOG UPDATE ---
+
+  // Dialog Baru: Wi-Fi
+  void _showUpdateWifiDialog(BuildContext context, SettingsController controller) {
+    Get.dialog(
+      CustomActionDialog(
+        title: 'Pengaturan Wi-Fi Alat',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.shade200)
+              ),
+              child: Row(
+                children: [
+                  Icon(Iconsax.info_circle, color: Colors.orange.shade700, size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Pastikan nama Wi-Fi (SSID) dan Password diketik dengan benar (huruf besar/kecil berpengaruh).',
+                      style: TextStyle(fontSize: 12, color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _buildTextField(
+              controller: controller.ssidC,
+              label: 'Nama Wi-Fi (SSID)',
+              action: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            _buildTextField(
+              controller: controller.passwordC,
+              label: 'Password Wi-Fi',
+              action: TextInputAction.done,
+              isPassword: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+          ),
+          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () => controller.saveWifiSettings(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[700],
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            child: const Text('Simpan'),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   // 1. Dialog Suhu
   void _showUpdateSuhuDialog(
@@ -318,6 +408,26 @@ class SettingsScreen extends StatelessWidget {
 
   // --- WIDGET HELPERS ---
 
+  // Helper untuk tombol Save/Cancel berulang
+  List<Widget> _buildDialogActions(VoidCallback onSave) {
+    return [
+      TextButton(
+        onPressed: () => Get.back(),
+        child: Text('Batal', style: TextStyle(color: Colors.grey[600])),
+      ),
+      const SizedBox(width: 8),
+      ElevatedButton(
+        onPressed: onSave,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue[700],
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: const Text('Simpan'),
+      ),
+    ];
+  }
+
   /// Helper untuk Text Field Angka (Decimal)
   Widget _buildNumberField({
     required TextEditingController controller,
@@ -329,6 +439,26 @@ class SettingsScreen extends StatelessWidget {
       // Penting: decimal: true agar bisa input koma untuk pH/Suhu
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       textInputAction: action,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+    );
+  }
+
+  /// Helper untuk Input Teks Biasa (Untuk Wi-Fi)
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required TextInputAction action,
+    bool isPassword = false,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.text, // Keyboard huruf biasa
+      textInputAction: action,
+      obscureText: false, // Set true jika ingin password disembunyikan (***)
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
@@ -424,7 +554,9 @@ class SettingsTile extends StatelessWidget {
                 color: Colors.grey[100],
                 borderRadius: BorderRadius.circular(6)
             ),
-            child: Text(value, style: TextStyle(color: Colors.grey[800], fontSize: 13, fontWeight: FontWeight.w600)),
+            // Agar kalau SSID panjang tidak overflow
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.35),
+            child: Text(value, style: TextStyle(color: Colors.grey[800], fontSize: 13, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis,),
           ),
           const SizedBox(width: 8),
           Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
